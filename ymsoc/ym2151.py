@@ -125,10 +125,11 @@ class JT51PHY(Module):
 
         ###
 
-        dacl.data.eq(self.inp.dacleft)
-        dacr.data.eq(self.inp.dacright)
-        pads.a0.eq(dacl.out)
-        pads.a1.eq(dacr.out)
+        self.comb += [dacl.data.eq(self.inp.dacleft),
+            dacr.data.eq(self.inp.dacright),
+            pads.a0.eq(dacl.out),
+            pads.a1.eq(dacr.out)
+        ]
 
 
 # https://github.com/jordens/redpid/blob/master/gateware/delta_sigma.py#L8

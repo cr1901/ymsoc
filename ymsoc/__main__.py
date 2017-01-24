@@ -3,52 +3,41 @@ import struct
 import argparse
 import importlib
 
-from migen import *
-from migen.genlib.io import CRG
-
-from misoc.integration.soc_core import *
 from misoc.integration.builder import *
-from misoc.cores.gpio import GPIOOut
+from misoc.integration.soc_core import *
+from ymsoc.builder import YMSoCBuilder
 
 
-class YMSoC(SoCCore):
-    def __init__(self, platform, **kwargs):
-        SoCCore.__init__(self, platform,
-            clk_freq=int((1/(platform.default_clk_period))*1000000000),
-            integrated_rom_size=0x8000,
-            integrated_main_ram_size=16*1024,
-            with_uart=False,
-            with_timer=False,
-            **kwargs)
-        self.submodules.crg = CRG(platform.request(platform.default_clk_name))
-        self.csr_devices.append("leds")
-        self.submodules.leds = GPIOOut(platform.request("user_led"))
-
-
-class YMSoCBuilder(Builder):
-    def __init__(self, soc, output_dir=None,
-                 compile_software=True, compile_gateware=True,
-                 gateware_toolchain_path=None,
-                 csr_csv=None):
-        Builder.__init__(self, soc, output_dir, compile_software,
-            compile_gateware, gateware_toolchain_path, csr_csv)
-
-    def _initialize_rom(self):
-        bios_file = os.path.join(self.output_dir, "software", "fm-driver",
-                                 "fm-driver.bin")
-        if self.soc.integrated_rom_size:
-            with open(bios_file, "rb") as boot_file:
-                boot_data = []
-                while True:
-                    w = boot_file.read(4)
-                    if not w:
-                        break
-                    boot_data.append(struct.unpack(">I", w)[0])
-            self.soc.initialize_rom(boot_data)
-
+jt51_sources = [
+    "jt51.v",
+    "jt51_envelope.v",
+    "jt51_exptable.v",
+    "jt51_lfo_lfsr.v",
+    "jt51_mmr.v",
+    "jt51_noise_lfsr.v",
+    "jt51_phasegen.v",
+    "jt51_pm.v",
+    "jt51_sh.v",
+    "jt51_sintable.v",
+    "jt51_timers.v",
+    "jt51_acc.v",
+    "jt51_exp2lin.v",
+    "jt51_lfo.v",
+    "jt51_lin2exp.v",
+    "jt51_noise.v",
+    "jt51_op.v",
+    "jt51_phinc_rom.v",
+    "jt51_reg.v",
+    "jt51_sh2.v",
+    "jt51_sum_op.v"
+]
 
 def main():
     parser = argparse.ArgumentParser(description="JT51 SoC for Testing")
+    parser.add_argument("--device", default=None,
+                        help="Override FPGA device name.")
+    # parser.add_argument("--programmer", default=None,
+    #                    help="Override FPGA programmer.")
     subparsers = parser.add_subparsers(dest="cmd")
 
     pparser = subparsers.add_parser("program",
@@ -67,12 +56,9 @@ def main():
     soc_core_args(bparser)
     bparser.add_argument("--jt51-dir", default="./jt51",
                         help="Path to JT51 core directory")
+    bparser.add_argument("platform",
+                        help="Module name of the Migen platform to build for. Must exist under ymsoc.platforms.")
 
-
-    parser.add_argument("--device", default=None,
-                        help="Override FPGA device name.")
-    parser.add_argument("platform",
-                        help="Module name of the Migen platform to build for.")
     args = parser.parse_args()
 
     platform_module = importlib.import_module(args.platform)
@@ -82,19 +68,15 @@ def main():
         platform = platform_module.Platform()
 
     if args.cmd == "build":
-        platform.add_source_dir(args.jt51_dir)
-
-        soc = YMSoC(platform, **soc_core_argdict(args))
-
+        platform.add_sources(args.jt51_dir, *jt51_sources)
+        platform.add_verilog_include_path(args.jt51_dir)
+        platform.add_source(os.path.abspath(os.path.join(os.path.dirname(__file__), "extern", "wb_async_reg.v")))
+        soc = platform_module.YMSoC(platform, **soc_core_argdict(args))
         builder = YMSoCBuilder(soc, **builder_argdict(args))
-        builder.software_packages = []
-        builder.add_software_package("libcompiler-rt")
-        builder.add_software_package("libbase")
-        builder.add_software_package("fm-driver", os.path.abspath(os.path.join(os.path.dirname("."), "firmware")))
         builder.build()
         # print(soc.get_csr_regions())
     else:
-        prog = platform.create_programmer()
+        prog = platform.create_programmer("openocd")
         if args.f:
             prog.flash(0, os.path.join(args.soc_dir, "gateware", "top.bin"))
         else:
