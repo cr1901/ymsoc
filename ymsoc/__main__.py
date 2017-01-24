@@ -69,7 +69,7 @@ def main():
 
     if args.cmd == "build":
         platform.add_sources(args.jt51_dir, *jt51_sources)
-        platform.add_verilog_include_path(args.jt51_dir)
+        # platform.add_verilog_include_path(args.jt51_dir)
         platform.add_source(os.path.abspath(os.path.join(os.path.dirname(__file__), "extern", "wb_async_reg.v")))
         soc = platform_module.YMSoC(platform, **soc_core_argdict(args))
         builder = YMSoCBuilder(soc, **builder_argdict(args))

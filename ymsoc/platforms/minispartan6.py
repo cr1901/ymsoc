@@ -53,7 +53,8 @@ class _CRG(Module):
 class YMSoC(YMSoCCore):
     def __init__(self, platform, **kwargs):
         clk_freq = 32*1000000
-        YMSoCCore.__init__(self, platform, clk_freq, integrated_rom_size=0x8000, **kwargs)
+        YMSoCCore.__init__(self, platform, clk_freq, integrated_rom_size=0x8000,
+            integrated_sram_size=0x8000, integrated_main_ram_size=0, **kwargs)
         self.submodules.crg = _CRG(platform, clk_freq)
 
 
