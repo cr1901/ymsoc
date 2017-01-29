@@ -97,8 +97,6 @@ class _CRG(Module):
         # self.specials += AsyncResetSynchronizer(self.cd_ym2151, ResetSignal("sys"))
 
 
-
-
 # Passing platform as an input argument is technically redundant since each
 # platform gets its own source file. This is a design decision
 # so that __main__.py can set platform-specific behavior before insantiating
@@ -109,35 +107,6 @@ class YMSoC(YMSoCCore):
         YMSoCCore.__init__(self, platform, clk_freq, integrated_rom_size=0x8000, **kwargs)
         # integrated_sram_size=0x4000, **kwargs)
         self.submodules.crg = _CRG(platform, clk_freq)
-
-        counter1 = Signal(24)
-        self.sync.ym2151 += [
-            counter1.eq(counter1 + 1)
-        ]
-
-        counter2 = Signal(20)
-        self.sync.ym2151 += [
-            If(self.ym2151.syscon2151.bus_out.ack,
-                counter2.eq(counter2 + 1))
-        ]
-
-        counter3 = Signal(20)
-        self.sync.ym2151 += [
-            If(self.ym2151.syscon2151.bus_out.stb & self.ym2151.syscon2151.bus_out.cyc,
-                counter3.eq(counter3 + 1))
-        ]
-
-        # self.comb += [platform.request("user_led").eq(counter1[23])]
-
-        self.comb += [platform.request("user_led").eq(counter2[-1])]
-        self.comb += [platform.request("user_led").eq(counter2[-2])]
-        self.comb += [platform.request("user_led").eq(counter2[-3])]
-
-        self.comb += [platform.request("user_led").eq(counter3[-1])]
-        self.comb += [platform.request("user_led").eq(counter3[-2])]
-        self.comb += [platform.request("user_led").eq(counter3[-3])]
-
-        # self.comb += [platform.request("user_led").eq(self.crg.dcm_locked)]
 
 
 # Extend w/ OpenOCD support.
