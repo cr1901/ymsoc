@@ -110,30 +110,6 @@ class YMSoC(YMSoCCore):
         # integrated_sram_size=0x4000, **kwargs)
         self.submodules.crg = _CRG(platform, clk_freq)
 
-        """m_wb = self.ym2151.syscon2151.bus_in
-        s_wb = self.ym2151.syscon2151.bus_out
-        serial = platform.request("serial")
-
-        self.specials += Instance("litescope",
-            i_sys_clock=ClockSignal("sys"),
-            i_sys_reset=ResetSignal("sys"),
-            # i_sys_clock=ClockSignal("scope"),
-            # i_sys_reset=ResetSignal("scope"),
-            # i_bus_clk=ClockSignal("sys"),
-            # i_bus_ymclk=ClockSignal("ym2151"),
-            # i_bus_rst=ResetSignal("sys"),
-            # i_bus_ymrst=ResetSignal("ym2151"),
-            i_bus_m_stb=m_wb.stb,
-            i_bus_m_cyc=m_wb.cyc,
-            i_bus_m_ack=m_wb.ack,
-            i_bus_s_stb=s_wb.stb,
-            i_bus_s_cyc=s_wb.cyc,
-            i_bus_s_ack=s_wb.ack,
-            i_serial_rx=serial.rx,
-            o_serial_tx=serial.tx,
-            o_dut_reset=self.crg.manual_reset,
-            o_user_led=platform.request("user_led"))"""
-
         counter1 = Signal(24)
         self.sync.ym2151 += [
             counter1.eq(counter1 + 1)
@@ -162,9 +138,6 @@ class YMSoC(YMSoCCore):
         self.comb += [platform.request("user_led").eq(counter3[-3])]
 
         # self.comb += [platform.request("user_led").eq(self.crg.dcm_locked)]
-
-        # self.platform.add_period_constraint(ClockSignal("scope"), 1000000000/(3*clk_freq))
-
 
 
 # Extend w/ OpenOCD support.

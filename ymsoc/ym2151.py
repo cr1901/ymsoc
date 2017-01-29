@@ -50,7 +50,6 @@ class SysConJT51(Module, AutoCSR):
     def __init__(self):
         self.bus_in = wishbone.Interface()
         self.bus_out = wishbone.Interface()
-        self.submodules.sync_guard = WaitTimer(8)
 
         mcyc_prev = Signal(1)
         mcyc_negedge = Signal(1)
@@ -111,8 +110,6 @@ class SysConJT51(Module, AutoCSR):
             If(mstb_negedge,
                 stb_wait_count.eq(8)),
         ]
-
-        # self.submodules.ack_guard
 
 
 class Wishbone2YM2151(Module):
