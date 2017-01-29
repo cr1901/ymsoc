@@ -50,24 +50,67 @@ class SysConJT51(Module, AutoCSR):
     def __init__(self):
         self.bus_in = wishbone.Interface()
         self.bus_out = wishbone.Interface()
+        self.submodules.sync_guard = WaitTimer(8)
+
+        mcyc_prev = Signal(1)
+        mcyc_negedge = Signal(1)
+        cyc_qual = Signal(1)
+        cyc_wait_count = Signal(4)
+
+        mstb_prev = Signal(1)
+        mstb_negedge = Signal(1)
+        stb_qual = Signal(1)
+        stb_wait_count = Signal(4)
+
+        bus_in_full = Signal(32)
+        bus_out_full = Signal(32)
+
+        self.comb += [bus_in_full.eq(Cat(C(0, 2), self.bus_in.adr))]
+        # self.comb += [self.bus_out.eq(bus_out_full[2:])]
+        self.comb += [self.bus_out.adr.eq(bus_out_full[2:])]
 
         self.specials.wb_cdc = Instance("wb_async_reg",
             # M
             i_wbm_clk=ClockSignal("sys"), i_wbm_rst=ResetSignal("sys"),
-            i_wbm_adr_i=self.bus_in.adr, i_wbm_dat_i=self.bus_in.dat_w,
+            i_wbm_adr_i=bus_in_full, i_wbm_dat_i=self.bus_in.dat_w,
             o_wbm_dat_o=self.bus_in.dat_r, i_wbm_we_i=self.bus_in.we,
-            i_wbm_sel_i=self.bus_in.sel, i_wbm_stb_i=self.bus_in.stb,
+            i_wbm_sel_i=self.bus_in.sel, i_wbm_stb_i=stb_qual,
             o_wbm_ack_o=self.bus_in.ack, o_wbm_err_o=self.bus_in.err,
-            i_wbm_cyc_i=self.bus_in.cyc,
+            i_wbm_cyc_i=cyc_qual,
 
             # S
             i_wbs_clk=ClockSignal("ym2151"), i_wbs_rst=ResetSignal("ym2151"),
-            o_wbs_adr_o=self.bus_out.adr, i_wbs_dat_i=self.bus_out.dat_r,
+            o_wbs_adr_o=bus_out_full, i_wbs_dat_i=self.bus_out.dat_r,
             o_wbs_dat_o=self.bus_out.dat_w, o_wbs_we_o=self.bus_out.we,
             o_wbs_sel_o=self.bus_out.sel, o_wbs_stb_o=self.bus_out.stb,
             i_wbs_ack_i=self.bus_out.ack, i_wbs_err_i=self.bus_out.err,
             o_wbs_cyc_o=self.bus_out.cyc
         )
+
+        # It's possible for CYC/STB to reassert in one clock cycle in the source
+        # domain. Force CYC/STB low to ensure its registered in dest to
+        # reset the CDC handshake.
+        self.comb += [cyc_qual.eq(self.bus_in.cyc & (cyc_wait_count == 0))]
+        self.comb += [stb_qual.eq(self.bus_in.stb & (stb_wait_count == 0))]
+
+        self.comb += [mcyc_negedge.eq(~self.bus_in.cyc & mcyc_prev)]
+        self.comb += [mstb_negedge.eq(~self.bus_in.stb & mstb_prev)]
+        self.sync += [
+            mcyc_prev.eq(self.bus_in.cyc),
+            mstb_prev.eq(self.bus_in.stb),
+
+            If(cyc_wait_count != 0,
+                cyc_wait_count.eq(cyc_wait_count - 1)),
+            If(stb_wait_count != 0,
+                stb_wait_count.eq(stb_wait_count - 1)),
+
+            # Not going to happen, but in case we aren't done prev count,
+            # restart it.
+            If(mcyc_negedge,
+                cyc_wait_count.eq(8)),
+            If(mstb_negedge,
+                stb_wait_count.eq(8)),
+        ]
 
         # self.submodules.ack_guard
 
@@ -84,7 +127,8 @@ class Wishbone2YM2151(Module):
         # IRQ connection goes to CPU.
         self.comb += [
             self.jt51.bus.d_in.eq(self.bus.dat_w[0:8]),
-            self.bus.dat_r[0:8].eq(self.jt51.bus.d_out),
+            # self.bus.dat_r.eq(self.jt51.bus.d_out),
+            self.bus.dat_r.eq(Replicate(self.jt51.bus.d_out, 4)),
             self.jt51.bus.a0.eq(self.bus.adr[0]),
             self.jt51.bus.cs_n.eq(~bus_cyc),
             self.jt51.bus.wr_n.eq(~self.bus.we)
