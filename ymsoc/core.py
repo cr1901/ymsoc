@@ -20,7 +20,6 @@ class YMSoCCore(SoCCore):
             with_uart=False,
             with_timer=False,
             **kwargs)
-        # self.submodules.crg = CRG(platform.request(platform.default_clk_name))
 
         self.submodules.ym2151 = CtlUnitYM2151()
         self.add_wb_slave(mem_decoder(self.mem_map["ym2151"]), self.ym2151.bus)
@@ -29,9 +28,9 @@ class YMSoCCore(SoCCore):
         # self.interrupt_devices.append("ym2151")
 
         # Audio connections
-        # audio = platform.request("audio")
-        # self.submodules.jt51_phy = JT51PHY(audio)
-        # self.comb += [self.ym2151.wb2151.jt51.out.connect(self.jt51_phy.inp)]
+        audio = platform.request("audio")
+        self.submodules.jt51_phy = JT51PHY(audio)
+        self.comb += [self.ym2151.wb2151.jt51.out.connect(self.jt51_phy.inp)]
 
         # LED connections
         leds = [platform.request("user_led") for x in range(2)]

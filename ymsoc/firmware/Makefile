@@ -21,7 +21,7 @@ fm-driver.elf: $(FM-DRIVER_DIRECTORY)/linker.ld $(OBJECTS)
 		-lbase-nofloat -lcompiler-rt
 	chmod -x $@
 
-main.o: $(FM-DRIVER_DIRECTORY)/main.c
+main.o: $(FM-DRIVER_DIRECTORY)/main.c $(FM-DRIVER_DIRECTORY)/ym2151.h $(FM-DRIVER_DIRECTORY)/ym2151_const.h
 	$(compile)
 
 %.o: $(FM-DRIVER_DIRECTORY)/%.c
@@ -29,6 +29,11 @@ main.o: $(FM-DRIVER_DIRECTORY)/main.c
 
 %.o: $(FM-DRIVER_DIRECTORY)/%.S
 	$(assemble)
+
+ym2151.h: ym2151_const.h
+
+ym2151_const.h: $(FM-DRIVER_DIRECTORY)/ym2151_const.m4
+	m4 $< > $@
 
 clean:
 	$(RM) $(OBJECTS) fm-driver.elf fm-driver.bin .*~ *~
