@@ -17,8 +17,8 @@ jt51_out = [
     ("ct2", 1, DIR_M_TO_S),
     ("p1", 1, DIR_M_TO_S),
     ("sample", 1, DIR_M_TO_S),
-    ("dacleft", 1, DIR_M_TO_S),
-    ("dacright", 1, DIR_M_TO_S),
+    ("dacleft", 16, DIR_M_TO_S),
+    ("dacright", 16, DIR_M_TO_S),
 ]
 
 
