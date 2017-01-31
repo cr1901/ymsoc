@@ -1,2 +1,4 @@
 *.*
 !.gitignore
+!sim/Makefile
+!sim/lm32_config.v
