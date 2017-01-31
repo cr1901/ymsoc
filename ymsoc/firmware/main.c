@@ -1,10 +1,17 @@
 #include <generated/csr.h>
 #include <generated/mem.h>
+#include <irq.h>
 
 #include "ym2151.h"
 
+extern volatile unsigned int num_samples;
+
 int main(int argc, char * argv[])
 {
+    irq_setie(1);
+    ym2151_ev_enable_write(0x02);
+    irq_setmask((1 << YM2151_INTERRUPT));
+
     /* write_ym2151_addr(CT);
     while(YM_CHECK_BUSY);
 
@@ -75,5 +82,18 @@ int main(int argc, char * argv[])
 
     /* Go! */
     write_ym2151_wait(KON_CH, KON_CH_BITS(0) + KON_SN_BITS(0x1));
-    while(1);
+
+    unsigned char i = 0;
+    while(1)
+    {
+        if(num_samples == 32000)
+        {
+            i = ((i + 1) & 0x03);
+            while(YM_CHECK_BUSY);
+            write_ym2151_addr(CT);
+            while(YM_CHECK_BUSY);
+            write_ym2151_data(CT_BITS(i));
+            num_samples = 0;
+        }
+    }
 }
