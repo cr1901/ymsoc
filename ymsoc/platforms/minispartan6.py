@@ -7,7 +7,7 @@ from migen.build.openocd import OpenOCD
 
 from ymsoc.core import YMSoCCore
 
-"""class _CRG(Module):
+class _CRG(Module):
     def __init__(self, platform, clk_freq):
         self.clock_domains.cd_ym2151 = ClockDomain()
         self.clock_domains.cd_sys = ClockDomain()
@@ -56,45 +56,7 @@ from ymsoc.core import YMSoCCore
         # Required in general case, but not here.
         self.specials += AsyncResetSynchronizer(self.cd_sys, ~dcm_locked | self.manual_reset)
         self.specials += AsyncResetSynchronizer(self.cd_ym2151, ResetSignal("sys"))
-        # self.specials += AsyncResetSynchronizer(self.cd_scope, ResetSignal("sys"))"""
-
-
-class _CRG(Module):
-    def __init__(self, platform, clk_freq):
-        self.clock_domains.cd_ym2151 = ClockDomain()
-        self.clock_domains.cd_sys = ClockDomain()
-        self.clock_domains.cd_por = ClockDomain(reset_less=True)
-
-        clk = platform.request("clk32")
-
-        # Power on Reset (vendor agnostic)
-        int_rst = Signal(reset=1)
-        self.sync.por += int_rst.eq(0)
-        self.comb += [
-            self.cd_sys.clk.eq(clk),
-            self.cd_por.clk.eq(clk),
-            self.cd_sys.rst.eq(int_rst)
-        ]
-
-        ym_clk = Signal(1)
-        cnt = Signal(2)
-        self.sync += [If(cnt == 3,
-                        cnt.eq(0),
-                        ym_clk.eq(~ym_clk)).
-                    Else(
-                        cnt.eq(cnt + 1)
-                    )]
-
-        self.comb += [self.cd_ym2151.clk.eq(ym_clk)]
-
-        reset_cnt = Signal(4, reset=8)
-        self.comb += [self.cd_ym2151.rst.eq(reset_cnt != 0)]
-        self.sync += [
-            If(reset_cnt != 0,
-                reset_cnt.eq(reset_cnt - 1))]
-
-        # self.comb += [self.cd_ym2151.clk.eq(clk)]
-        # self.specials += AsyncResetSynchronizer(self.cd_ym2151, ResetSignal("sys"))
+        # self.specials += AsyncResetSynchronizer(self.cd_scope, ResetSignal("sys"))
 
 
 # Passing platform as an input argument is technically redundant since each
