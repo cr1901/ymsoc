@@ -53,11 +53,15 @@ class CtlUnitYM2151(Module, AutoCSR):
 
         self.submodules.ev = EventManager()
         self.ev.time_up = EventSourceLevel()
+        self.ev.sample_ready = EventSourcePulse()
         self.ev.finalize()
 
-        irq_n = Signal() # Bring irq_n to sys domain
+        irq_n = Signal() # Bring irq_n to sys domain.
+        sample = Signal() # Ditto with the sample signal.
         self.specials += MultiReg(self.wb2151.jt51.bus.irq_n, irq_n)
+        self.specials += MultiReg(self.wb2151.jt51.out.sample, sample)
         self.comb += [self.ev.time_up.trigger.eq(irq_n == 0)]
+        self.comb += [self.ev.sample_ready.trigger.eq(sample)]
 
         # sel_exprs = [(lambda a : a[10:12] == 0, self.syscon2151.bus_in),
         #              (lambda a : a[10] == 1, self.ym_out.bus),

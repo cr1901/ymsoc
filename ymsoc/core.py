@@ -24,8 +24,8 @@ class YMSoCCore(SoCCore):
         self.submodules.ym2151 = CtlUnitYM2151()
         self.add_wb_slave(mem_decoder(self.mem_map["ym2151"]), self.ym2151.bus)
         self.add_memory_region("ym2151", self.mem_map["ym2151"] | self.shadow_base, 0x1000)
-        # self.csr_devices += ["ym2151"] # CSR bus provides IRQ logic.
-        # self.interrupt_devices.append("ym2151")
+        self.csr_devices += ["ym2151"] # CSR bus provides IRQ logic.
+        self.interrupt_devices.append("ym2151")
 
         # Audio connections
         audio = platform.request("audio")
