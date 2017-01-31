@@ -1,83 +1,82 @@
 #ifndef YM2151_CONST
 #define YM2151_CONST
-dnl
-dnl https://www.gnu.org/software/m4/manual/m4-1.4.15/html_node/Improved-forloop.html#Improved-forloop
 divert(-1)dnl
+
+# https://www.gnu.org/software/m4/manual/m4-1.4.15/html_node/Improved-forloop.html#Improved-forloop
 define(`forloop', `ifelse(eval(`($2) <= ($3)'), `1',
   `pushdef(`$1')_$0(`$1', eval(`$2'),
     eval(`$3'), `$4')popdef(`$1')')')dnl
 define(`_forloop',
   `define(`$1', `$2')$4`'ifelse(`$2', `$3', `',
     `$0(`$1', incr(`$2'), `$3', `$4')')')
-divert`'dnl
-dnl
-dnl Registers are of the form NAME_CHX_{MX, CX}
-define(`reg_addr_op', `eval($1 + $2 + $3 - 1, `16')')dnl
-define(`reg_define_op', `#define $1_CH'`$3'`_$2 $4')dnl
-define(`reg_define_wrap_op', `reg_define_op(`$1', `$2', $3, 0x`'reg_addr_op($1, $2, $3))')dnl
-dnl
-dnl Registers are of the form NAME_CHX
-define(`reg_addr_ch', `eval($1 + $2 - 1, `16')')dnl
-define(`reg_define_ch', `#define $1_CH'`$2'` $3')dnl
-define(`reg_define_wrap_ch', `reg_define_ch(`$1', `$2', 0x`'reg_addr_ch($1, $2))')dnl
-dnl
-dnl Shift bits to appropriate location.
-define(`valid_bits', `eval((1 << $1) - 1, `16')')dnl
+
+# Registers are of the form NAME_CHX_{MX, CX}
+define(`reg_addr_op', `eval($1 + $2 + $3 - 1, `16')')
+define(`reg_define_op', `#define $1_CH'`$3'`_$2 $4')
+define(`reg_define_wrap_op', `reg_define_op(`$1', `$2', $3, 0x`'reg_addr_op($1, $2, $3))')
+
+# Registers are of the form NAME_CHX
+define(`reg_addr_ch', `eval($1 + $2 - 1, `16')')
+define(`reg_define_ch', `#define $1_CH'`$2'` $3')
+define(`reg_define_wrap_ch', `reg_define_ch(`$1', `$2', 0x`'reg_addr_ch($1, $2))')
+
+# Shift bits to appropriate location.
+define(`valid_bits', `eval((1 << $1) - 1, `16')')
 define(`define_bits',
-``#define $1_BITS(_x) (((unsigned char) (_x) & 0x'valid_bits($2)`) << $3)'')dnl
-dnl
-dnl Iterate over operators and channels.
+``#define $1_BITS(_x) (((unsigned char) (_x) & 0x'valid_bits($2)`) << $3)'')
+
+# Iterate over operators and channels.
 define(`for_op',
 `for_chan_op(`$1', `M1')
 for_chan_op(`$1', `M2')
 for_chan_op(`$1', `C1')
 for_chan_op(`$1', `C2')dnl'
-)dnl
-dnl
-dnl Create a define for each channel.
+)
+
+# Create a define for each channel.
 define(`for_chan', `forloop(`i', `1', `8', `reg_define_wrap_ch(`$1', i)
-')')dnl
-dnl
-dnl Create a define for each channel, given operator.
+')')
+
+# Create a define for each channel, given operator.
 define(`for_chan_op', `forloop(`i', `1', `8', `reg_define_wrap_op(`$1', `$2', i)
-')')dnl
-dnl
-dnl gen_reg_const(name, addr, bits, bits_offset)
-dnl Create a constant unique to each operator.
+')')
+
+# gen_reg_const(name, addr, bits, bits_offset)
+# Create a constant unique to each operator.
 define(`gen_reg_const_op',
 `define(`$1', $2)dnl
 /* Constant definitions for `$1' */
 for_op(`$1')
 define_bits(`$1', $3, $4)
 
-')dnl
-dnl
-dnl Same, but for each channel.
+')
+
+# Same, but for each channel.
 define(`gen_reg_const_chan',
 `define(`$1', $2)dnl
 /* Constant definitions for `$1' */
 for_chan(`$1')
 define_bits(`$1', $3, $4)
 
-')dnl
-dnl
-dnl Single constant.
+')
+
+# Single constant.
 define(`gen_reg_const',
 `define(`$1', $2)dnl
 /* Constant definitions for `$1' */
 #define $1 $2
 define_bits(`$1', $3, $4)
 
-')dnl
-dnl
-dnl Defines-required by macros...
-define(`M1', 0)dnl
-define(`M2', 8)dnl
-define(`C1', 16)dnl
-define(`C2', 24)dnl
-dnl
-dnl Begin constant defines.
-undivert()dnl
+')
+
+# Defines-required by macros...
+define(`M1', 0)
+define(`M2', 8)
+define(`C1', 16)
+define(`C2', 24)
+
+# Begin constant defines.
+divert`'dnl
 
 gen_reg_const(`TEST0', 0x01, 6, 2)dnl
 gen_reg_const(`LFO_RESET', 0x01, 1, 1)dnl
