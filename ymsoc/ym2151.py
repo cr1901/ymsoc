@@ -164,13 +164,19 @@ class JT51PHY(Module):
         (dacl, dacr) = (DeltaSigma(), DeltaSigma())
         self.submodules += [dacl, dacr]
 
+        # Audio pad names aren't standardized in Migen.
+        for pad_names in zip(["a0", "channel1"], ["a1", "channel2"]):
+            try:
+                l = getattr(pads, pad_names[0])
+                r = getattr(pads, pad_names[1])
+            except AttributeError:
+                continue
+        self.comb += [l.eq(dacl.out), r.eq(dacr.out)]
+
         ###
 
         self.comb += [dacl.data.eq(self.inp.dacleft),
-            dacr.data.eq(self.inp.dacright),
-            pads.a0.eq(dacl.out),
-            pads.a1.eq(dacr.out)
-        ]
+            dacr.data.eq(self.inp.dacright)]
 
 
 # https://github.com/jordens/redpid/blob/master/gateware/delta_sigma.py#L8
