@@ -39,7 +39,7 @@ SECTIONS
 		. = ALIGN(4);
 		_ebss = .;
 		_end = .;
-	} > main_ram
+	} > sram
 
 	/DISCARD/ :
 	{

@@ -27,7 +27,7 @@ SOURCES += $(YMSOC)/build/gateware/top.v $(YMSOC)/ymsoc/extern/wb_async_reg.v
 
 all: sim
 
-$(YMSOC)/build/gateware/top.v: $(YMSOC)/ymsoc/*.py $(YMSOC)/ymsoc/platforms/minispartan6.py $(YMSOC)/ymsoc/firmware/*.c
+$(YMSOC)/build/gateware/top.v: $(YMSOC)/ymsoc/*.py $(YMSOC)/ymsoc/platforms/sim.py $(YMSOC)/ymsoc/firmware/*.c
 	cd $(YMSOC)
 	PYTHONPATH=$(YMSOC) python3 -m ymsoc --device xc6slx25 build --jt51-dir $(JT51) --output-dir $(YMSOC)/build --no-compile-gateware ymsoc.platforms.sim
 
