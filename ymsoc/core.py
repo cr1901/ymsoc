@@ -36,3 +36,7 @@ class YMSoCCore(SoCCore):
         leds = [platform.request("user_led") for x in range(2)]
         self.comb += [leds[0].eq(self.ym2151.wb2151.jt51.out.ct1)]
         self.comb += [leds[1].eq(self.ym2151.wb2151.jt51.out.ct2)]
+
+        # Hack: Avoid compile error for missing UART interrupt by forcing
+        # definition to a bogus value.
+        self._constants.append(("UART_INTERRUPT", 33))
