@@ -151,7 +151,6 @@ def read_port(bus, adr):
     return (yield bus.dat_r)
 
 
-
 if __name__ == "__main__":
     m = Arbiter()
     ios = [io[0] for io in m.host_bus.iter_flat()]

@@ -9,6 +9,7 @@ from ymsoc.ym2151 import *
 class YMSoCCore(SoCCore):
     mem_map = {
         "ym2151": 0x30000000,
+        "host": 0x50000000,
     }
     mem_map.update(SoCCore.mem_map)
 

@@ -14,7 +14,7 @@ class UARTBridge(Module):
     def __init__(self, clk_freq, baud_rate=115200):
         self.submodules.uart = ClockDomainsRenamer({"sys" : "arb"})(Core(clk_freq, baud_rate))
         self.bus = Record(arb_bus)
-        self.submodules.fsm = fsm = FSM("WAIT_CMD")
+        self.submodules.fsm = fsm = ClockDomainsRenamer({"sys" : "arb"})(FSM("WAIT_CMD"))
 
         self.command = Signal(8)
         self.addr = Signal(16)
@@ -29,7 +29,7 @@ class UARTBridge(Module):
         self.comb += [addr_space.eq(self.command[1:3])]
 
         fsm.act("WAIT_CMD",
-            If(~uart.rx_empty,
+            If(~self.uart.rx_empty,
                 NextState("WAIT_ADDR"),
                 NextValue(self.command, self.uart.in_data),
                 self.uart.rd.eq(1)
@@ -37,7 +37,7 @@ class UARTBridge(Module):
         )
 
         fsm.act("WAIT_ADDR",
-            If(~uart.rx_empty,
+            If(~self.uart.rx_empty,
                 self.uart.rd.eq(1),
                 If(addr_word == 1,
                     NextValue(self.addr[8:], self.uart.in_data),
@@ -45,7 +45,7 @@ class UARTBridge(Module):
                     If(read,
                         # Preemptively start read.
                         self.bus.wr.eq(0),
-                        self.bus.adr.eq(Cat(self.addr, add_space)),
+                        self.bus.adr.eq(Cat(self.addr, addr_space)),
                         NextState("DO_READ")
                     ).
                     Else(NextState("WAIT_DATA"))
@@ -58,7 +58,7 @@ class UARTBridge(Module):
         )
 
         fsm.act("WAIT_DATA",
-            If(~uart.rx_empty,
+            If(~self.uart.rx_empty,
                 self.uart.rd.eq(1),
                 If(data_word == 3,
                     NextValue(self.data[24:], self.uart.in_data),
@@ -82,32 +82,32 @@ class UARTBridge(Module):
 
         fsm.act("DO_WRITE",
             self.bus.wr.eq(1),
-            self.bus.adr.eq(Cat(self.addr, add_space)),
+            self.bus.adr.eq(Cat(self.addr, addr_space)),
             self.bus.dat_w.eq(self.data),
             NextState("WAIT_CMD")
         )
 
         fsm.act("DO_READ",
             self.bus.wr.eq(0),
-            self.bus.adr.eq(Cat(self.addr, add_space)),
+            self.bus.adr.eq(Cat(self.addr, addr_space)),
 
-            If(uart.tx_empty,
+            If(self.uart.tx_empty,
                 self.uart.wr.eq(1),
                 If(data_word == 3,
-                    self.uart.out_data.eq(self.arb_bus.dat_r[24:]),
+                    self.uart.out_data.eq(self.bus.dat_r[24:]),
                     NextValue(data_word, 0),
                     NextState("WAIT_CMD")
                 ).
                 Elif(data_word == 2,
-                    self.uart.out_data.eq(self.arb_bus.dat_r[16:24]),
+                    self.uart.out_data.eq(self.bus.dat_r[16:24]),
                     NextValue(data_word, data_word + 1)
                 ).
                 Elif(data_word == 1,
-                    self.uart.out_data.eq(self.arb_bus.dat_r[8:16]),
+                    self.uart.out_data.eq(self.bus.dat_r[8:16]),
                     NextValue(data_word, data_word + 1)
                 ).
                 Else(
-                    self.uart.out_data.eq(self.arb_bus.dat_r[0:8]),
+                    self.uart.out_data.eq(self.bus.dat_r[0:8]),
                     NextValue(data_word, data_word + 1)
                 )
             )
@@ -118,7 +118,7 @@ if __name__ == "__main__":
     m = UARTBridge()
     a = Arbiter()
 
-    m.comb += [m.arb_bus.connect(a.host_bus)]
+    m.comb += [m.bus.connect(a.host_bus)]
     # ios = [io[0] for io in m.host_bus.iter_flat()]
     # ios.extend([io[0] for io in m.rom_port.iter_flat()])
     # ios.extend([m.cpu_reset])
