@@ -1,0 +1,3 @@
+-e git+git@github.com:m-labs/migen.git@e93d0601830fd78588d51893466d5b68d8ad43ae#egg=migen
+-e git+git@github.com:m-labs/misoc.git@421b19720721b14d115c363e28c801ed7dacc7ad#egg=misoc
+pyserial == 3.2.1
