@@ -74,6 +74,8 @@ class ArbReg(Module):
         ]
 
 
+# Originally I intended to put the device on the wishbone bus, but decided
+# not to.
 """class ArbSend(Module):
     def __init__(self):
         self.cpu_bus = wishbone.Interface()

@@ -6,12 +6,13 @@ from migen.build.platforms import minispartan6
 from migen.build.openocd import OpenOCD
 
 from ymsoc.core import YMSoCCore
+from ymsoc.interface.uart.bridge import UARTBridge
 
 class _CRG(Module):
     def __init__(self, platform, clk_freq):
         self.clock_domains.cd_ym2151 = ClockDomain()
         self.clock_domains.cd_sys = ClockDomain()
-        self.clock_domains.cd_scope = ClockDomain()
+        self.clock_domains.cd_arb = ClockDomain()
 
         self.manual_reset = Signal(1)
 
@@ -50,13 +51,14 @@ class _CRG(Module):
             o_O=self.cd_sys.clk)
         self.specials += Instance("BUFG", name="ym2151_bufg",
             i_I=clk_ym2151_bufg_in, o_O=self.cd_ym2151.clk)
-        # self.specials += Instance("BUFG", name="scope_bufg",
-        #    i_I=clk_scope_bufg_in, o_O=self.cd_scope.clk)
+
+        # Arb uses same clock as sys, but different reset.
+        self.comb += [self.cd_arb.clk.eq(self.cd_sys.clk)]
 
         # Required in general case, but not here.
         self.specials += AsyncResetSynchronizer(self.cd_sys, ~dcm_locked | self.manual_reset)
         self.specials += AsyncResetSynchronizer(self.cd_ym2151, ResetSignal("sys"))
-        # self.specials += AsyncResetSynchronizer(self.cd_scope, ResetSignal("sys"))
+        self.specials += AsyncResetSynchronizer(self.cd_arb, ~dcm_locked)
 
 
 # Passing platform as an input argument is technically redundant since each
@@ -72,6 +74,13 @@ class YMSoC(YMSoCCore):
             **kwargs)
         # integrated_sram_size=0x4000, **kwargs)
         self.submodules.crg = _CRG(platform, clk_freq)
+        self.submodules.bridge = UARTBridge(clk_freq, 115200)
+
+        ser = platform.request("serial")
+        self.comb += [self.crg.manual_reset.eq(self.host.cpu_reset)]
+        self.comb += [ser.tx.eq(self.bridge.uart.tx),
+            self.bridge.uart.rx.eq(ser.rx)]
+        self.comb += [self.bridge.bus.connect(self.host.host_bus)]
 
 
 # Extend w/ OpenOCD support.
