@@ -1,4 +1,5 @@
 *.*
+*/*
 !.gitignore
 !sim/Makefile
 !sim/ymsoc_tb.v
