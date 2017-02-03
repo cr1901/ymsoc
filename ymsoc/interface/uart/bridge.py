@@ -2,7 +2,7 @@ from migen import *
 from migen.fhdl.verilog import convert
 
 from ymsoc.arbiter import *
-from ymsoc.uart import Core
+from ymsoc.interface.uart.uart import Core # FIXME: Redundant namespace
 
 
 # Extremely naive Host-to-sound-CPU interface that favors simplicity over
