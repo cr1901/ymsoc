@@ -1,7 +1,7 @@
 include ../include/generated/variables.mak
 include $(MISOC_DIRECTORY)/software/common.mak
 
-OBJECTS=main.o isr.o
+OBJECTS=main.o isr.o ym2151.o
 
 all: fm-driver.bin
 

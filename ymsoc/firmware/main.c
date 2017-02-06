@@ -25,11 +25,11 @@ int main(int argc, char * argv[])
 
     /* Channel 1, Algorithm 7, Operator M1, 440 Hz. */
     /* Phase generator */
+    while(YM_CHECK_BUSY);
     write_ym2151_wait(KC_CH1, KC_BITS(0x40 + 10));
     write_ym2151_wait(KF_CH1, KF_BITS(0));
-    write_ym2151_wait(MUL_CH1_M1, MUL_BITS(1));
-    write_ym2151_wait(DT1_CH1_M1, DT1_BITS(0));
-    write_ym2151_wait(DT2_CH1_M1, DT2_BITS(0));
+    write_ym2151_wait(MUL_CH1_M1, MUL_BITS(1) | DT1_BITS(0));
+    write_ym2151_wait(DT2_CH1_M1, DT2_BITS(0) | D2R_BITS(0));
     write_ym2151_wait(PMS_CH1, PMS_BITS(0));
 
     /* write_ym2151_wait(MUL_CH1_M2, MUL_BITS(0));
@@ -48,13 +48,10 @@ int main(int argc, char * argv[])
     write_ym2151_wait(FB_CH1, RL_BITS(3) | FB_BITS(0) | CONECT_BITS(7));
 
     /* Envelope generator */
-    write_ym2151_wait(AR_CH1_M1, AR_BITS(31));
+    write_ym2151_wait(AR_CH1_M1, AR_BITS(4) | KS_BITS(0));
     write_ym2151_wait(D1R_CH1_M1, D1R_BITS(0));
-    write_ym2151_wait(D2R_CH1_M1, D2R_BITS(0));
-    write_ym2151_wait(RR_CH1_M1, RR_BITS(15));
-    write_ym2151_wait(KS_CH1_M1, KS_BITS(0));
-    write_ym2151_wait(D1L_CH1_M1, D1L_BITS(0));
-    write_ym2151_wait(TL_CH1_M1, TL_BITS(10));
+    write_ym2151_wait(RR_CH1_M1, RR_BITS(15) | D1L_BITS(0));
+    write_ym2151_wait(TL_CH1_M1, TL_BITS(0));
 
     /* write_ym2151_wait(AR_CH1_M2, AR_BITS(0));
     write_ym2151_wait(D1R_CH1_M2, D1R_BITS(0));
@@ -81,7 +78,10 @@ int main(int argc, char * argv[])
     write_ym2151_wait(TL_CH1_C2, TL_BITS(0)); */
 
     /* Go! */
-    write_ym2151_wait(KON_CH, KON_CH_BITS(0) + KON_SN_BITS(0x1));
+    for(int j = 0; j < 8; j++)
+    {
+        write_ym2151_wait(KON_CH, KON_CH_BITS(j) + KON_SN_BITS(0x1));
+    }
 
     unsigned char i = 0;
     while(1)
