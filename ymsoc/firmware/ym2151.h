@@ -40,7 +40,7 @@ typedef struct ym2151_inst
 
 typedef struct ym2151_rt
 {
-    ym2151_inst inst;
+    ym2151_inst * inst;
     unsigned char rl;
     unsigned char kc;
     unsigned char kf;

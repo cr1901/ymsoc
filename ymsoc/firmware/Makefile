@@ -13,12 +13,11 @@ all: fm-driver.bin
 fm-driver.elf: $(FM-DRIVER_DIRECTORY)/linker.ld $(OBJECTS)
 
 %.elf:
-	$(LD) $(LDFLAGS) -T $< -N -o $@ \
+	$(LD) --gc-sections $(LDFLAGS) -T $< -N -o $@ \
 		../libbase/crt0-$(CPU).o \
 		$(OBJECTS) \
 		-L../libbase \
-		-L../libcompiler-rt \
-		-lbase-nofloat -lcompiler-rt
+		-lbase-nofloat
 	chmod -x $@
 	lm32-elf-objdump -d fm-driver.elf > fm-driver.asm
 

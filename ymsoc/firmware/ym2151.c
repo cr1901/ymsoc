@@ -24,7 +24,7 @@ void load_ym2151_inst(ym2151_inst * inst, unsigned char chan)
 void load_ch_params(ym2151_rt * rt, unsigned char chan)
 {
     wait_ready();
-    unsigned char rl_bits = FB_BITS(rt->inst.fb) | CONECT_BITS(rt->inst.conect);
+    unsigned char rl_bits = FB_BITS(rt->inst->fb) | CONECT_BITS(rt->inst->conect);
     write_ym2151_wait(RL_CH1 + chan, RL_BITS(rt->rl) | rl_bits);
     write_ym2151_wait(KC_CH1 + chan, KC_BITS(rt->kc));
     write_ym2151_wait(KF_CH1 + chan, KF_BITS(rt->kf));
