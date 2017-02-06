@@ -9,11 +9,16 @@
 #define YM_ADDR (volatile unsigned char *) YM2151_BASE
 #define YM_DATA (volatile unsigned char *) (YM2151_BASE + 4)
 
+#define TIMER_A 0x01
+#define TIMER_B 0x02
+
 /* Read constants. */
 #define YM_BUSY 0x80
 #define YM_IST 0x03
+#define YM_IST_B 0x02
 
 #define YM_CHECK_BUSY (read_ym2151() & YM_BUSY)
+#define YM_CHECK_IST (read_ym2151() & YM_IST)
 
 
 typedef struct ym2151_op
@@ -51,11 +56,21 @@ typedef struct ym2151_rt
 // I suggest creating an array of 8 so you can have a mirror of registers.
 
 
+// Instrument/Sound helpers
 void load_ym2151_inst(ym2151_inst * inst, unsigned char chan);
 void load_ch_params(ym2151_rt * rt, unsigned char chan); // Do not use for updating, only for reset/init.
 
+// Timer helpers
+void load_timerab(unsigned int pda, unsigned char pdb, int flag);
+void start_timerab(int flag);
+void clearov_timerab(int flag);
+void irqen_timerab(int flag);
+void csm_timera(unsigned char keyon);
+inline unsigned char readirq_timerab(void);
+
+
+// Generic R/W
 void write_ym2151_wait(unsigned char addr, unsigned char data);
-void write_ym2151_no_wait(unsigned char addr, unsigned char data);
 inline void write_ym2151_addr(unsigned char addr);
 inline void write_ym2151_data(unsigned char data);
 inline unsigned char read_ym2151(void);
@@ -74,6 +89,11 @@ inline void write_ym2151_data(unsigned char data)
 inline unsigned char read_ym2151(void)
 {
     return (* YM_DATA);
+}
+
+inline unsigned char readirq_timerab(void)
+{
+    return YM_CHECK_IST;
 }
 
 inline void wait_ready(void)

@@ -32,16 +32,45 @@ void load_ch_params(ym2151_rt * rt, unsigned char chan)
 }
 
 
+void load_timerab(unsigned int pda, unsigned char pdb, int flag)
+{
+    if(flag & TIMER_A)
+    {
+        write_ym2151_wait(CLKA, CLKA_BITS(pda));
+        write_ym2151_wait(CLKA2, CLKA2_BITS(pda >> 8));
+    }
+
+    if(flag & TIMER_B)
+    {
+        write_ym2151_wait(CLKB, CLKB_BITS(pdb));
+    }
+}
+
+void start_timerab(int flag)
+{
+    write_ym2151_wait(LOAD, LOAD_BITS(flag));
+}
+
+void clearov_timerab(int flag)
+{
+    write_ym2151_wait(F_RESET, F_RESET_BITS(flag));
+}
+
+void irqen_timerab(int flag)
+{
+    write_ym2151_wait(IRQEN, IRQEN_BITS(flag));
+}
+
+void csm_timera(unsigned char keyon)
+{
+    write_ym2151_wait(CSM, CSM_BITS(keyon));
+}
+
+
 void write_ym2151_wait(unsigned char addr, unsigned char data)
 {
     write_ym2151_addr(addr);
     wait_ready();
     write_ym2151_data(data);
     wait_ready();
-}
-
-void write_ym2151_no_wait(unsigned char addr, unsigned char data)
-{
-    write_ym2151_addr(addr);
-    write_ym2151_data(data);
 }
