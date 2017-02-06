@@ -20,6 +20,7 @@ fm-driver.elf: $(FM-DRIVER_DIRECTORY)/linker.ld $(OBJECTS)
 		-L../libcompiler-rt \
 		-lbase-nofloat -lcompiler-rt
 	chmod -x $@
+	lm32-elf-objdump -d fm-driver.elf > fm-driver.asm
 
 main.o: $(FM-DRIVER_DIRECTORY)/main.c $(FM-DRIVER_DIRECTORY)/ym2151.h
 	$(compile)
