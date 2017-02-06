@@ -30,9 +30,9 @@ main.o: $(FM-DRIVER_DIRECTORY)/main.c $(FM-DRIVER_DIRECTORY)/ym2151.h
 %.o: $(FM-DRIVER_DIRECTORY)/%.S
 	$(assemble)
 
-$(FM-DRIVER_DIRECTORY)/ym2151.h: ym2151_const.h
+$(FM-DRIVER_DIRECTORY)/ym2151.h: $(BUILDINC_DIRECTORY)/ym2151_const.h
 
-ym2151_const.h: $(FM-DRIVER_DIRECTORY)/ym2151_const.m4
+$(BUILDINC_DIRECTORY)/ym2151_const.h: $(FM-DRIVER_DIRECTORY)/ym2151_const.m4
 	m4 $< > $@
 
 clean:
