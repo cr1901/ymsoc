@@ -3,13 +3,13 @@
 void load_ym2151_inst(ym2151_inst * inst, unsigned char chan)
 {
     wait_ready();
-    write_ym2151_wait(FB_CH1 + chan * 8, FB_BITS(inst->fb) | CONECT_BITS(inst->conect));
+    write_ym2151_wait(FB_CH1 + chan, FB_BITS(inst->fb) | CONECT_BITS(inst->conect));
 
     // Op order: M1, M2, C1, C2
     for(int op = 0; op < 4; op++)
     {
         ym2151_op * curr_op = &inst->op[op];
-        unsigned char op_offs = chan*32 + op*8;
+        unsigned char op_offs = chan + op*8;
 
         write_ym2151_wait(MUL_CH1_M1 + op_offs, DT1_BITS(curr_op->dt1) | MUL_BITS(curr_op->mul));
         write_ym2151_wait(TL_CH1_M1 + op_offs, TL_BITS(curr_op->tl));
