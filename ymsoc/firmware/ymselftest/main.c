@@ -4,6 +4,7 @@
 
 #include <ym2151.h>
 
+#define CHAN 1
 
 extern volatile unsigned int num_samples;
 extern volatile int timera_ov;
@@ -15,6 +16,7 @@ int main(int argc, char * argv[])
     irq_setie(1);
     ym2151_ev_enable_write(0x03);
     irq_setmask((1 << YM2151_INTERRUPT));
+    panic_ym2151();
 
 #ifdef STOP_TEST
     wait_ready();
@@ -65,8 +67,8 @@ int main(int argc, char * argv[])
         .ams = 0
     };
 
-    load_ym2151_inst(&sine, 0);
-    load_ch_params(&sine_rt, 0);
+    load_ym2151_inst(&sine, CHAN);
+    load_ch_params(&sine_rt, CHAN);
 
     load_timerab(0x3FE, 0, TIMER_A);
     ctl_timerab(1, 1, 1, 0, TIMER_A);
@@ -79,7 +81,7 @@ int main(int argc, char * argv[])
     ctl_timerab(0, 0, 0, 0, TIMER_A);
 
     /* Go! */
-    write_ym2151_wait(KON_CH, KON_CH_BITS(0) | KON_SN_BITS(0x5));
+    write_ym2151_wait(KON_CH, KON_CH_BITS(CHAN) | KON_SN_BITS(0x5));
 
     unsigned char i = 0;
     while(1)
