@@ -31,6 +31,26 @@ void load_ch_params(ym2151_rt * rt, unsigned char chan)
     write_ym2151_wait(PMS_CH1 + chan, PMS_BITS(rt->pms) | AMS_BITS(rt->ams));
 }
 
+void panic_ym2151(void)
+{
+    for(int chan=0; chan < 8; chan++)
+    {
+        write_ym2151_wait(FB_CH1 + chan, FB_BITS(0) | CONECT_BITS(0));
+        for(int op = 0; op < 4; op++)
+        {
+            unsigned char op_offs = chan + op*8;
+            write_ym2151_wait(MUL_CH1_M1 + op_offs, DT1_BITS(0) | MUL_BITS(0));
+            write_ym2151_wait(TL_CH1_M1 + op_offs, TL_BITS(127));
+            write_ym2151_wait(AR_CH1_M1 + op_offs, KS_BITS(0) | AR_BITS(31));
+            write_ym2151_wait(D1R_CH1_M1 + op_offs, AMS_EN_BITS(0) | D1R_BITS(0));
+            write_ym2151_wait(D2R_CH1_M1 + op_offs, DT2_BITS(0) | D2R_BITS(0));
+            write_ym2151_wait(RR_CH1_M1 + op_offs, D1L_BITS(0) | RR_BITS(15));
+        }
+        write_ym2151_wait(KON_CH, KON_CH_BITS(chan) | KON_SN_BITS(0xF));
+        write_ym2151_wait(KON_CH, KON_CH_BITS(chan) | KON_SN_BITS(0x0));
+    }
+}
+
 
 void load_timerab(unsigned int pda, unsigned char pdb, int flag)
 {

@@ -59,6 +59,7 @@ typedef struct ym2151_rt
 // Instrument/Sound helpers
 void load_ym2151_inst(ym2151_inst * inst, unsigned char chan);
 void load_ch_params(ym2151_rt * rt, unsigned char chan); // Do not use for updating, only for reset/init.
+void panic_ym2151(void);
 
 // Timer helpers
 void load_timerab(unsigned int pda, unsigned char pdb, int flag);
