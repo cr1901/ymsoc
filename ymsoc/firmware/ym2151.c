@@ -36,8 +36,8 @@ void load_timerab(unsigned int pda, unsigned char pdb, int flag)
 {
     if(flag & TIMER_A)
     {
-        write_ym2151_wait(CLKA, CLKA_BITS(pda));
-        write_ym2151_wait(CLKA2, CLKA2_BITS(pda >> 8));
+        write_ym2151_wait(CLKA, CLKA_BITS(pda >> 2));
+        write_ym2151_wait(CLKA2, CLKA2_BITS(pda));
     }
 
     if(flag & TIMER_B)
@@ -46,24 +46,13 @@ void load_timerab(unsigned int pda, unsigned char pdb, int flag)
     }
 }
 
-void start_timerab(int flag)
+void ctl_timerab(unsigned char clear_ov, unsigned char irq_en, unsigned char load, unsigned char keyon, int flag)
 {
-    write_ym2151_wait(LOAD, LOAD_BITS(flag));
-}
-
-void clearov_timerab(int flag)
-{
-    write_ym2151_wait(F_RESET, F_RESET_BITS(flag));
-}
-
-void irqen_timerab(int flag)
-{
-    write_ym2151_wait(IRQEN, IRQEN_BITS(flag));
-}
-
-void csm_timera(unsigned char keyon)
-{
-    write_ym2151_wait(CSM, CSM_BITS(keyon));
+    unsigned char ov_mask = clear_ov ? F_RESET_BITS(flag) : 0;
+    unsigned char irq_mask = irq_en ? IRQEN_BITS(flag) : 0;
+    unsigned char load_mask = load ? LOAD_BITS(flag) : 0;
+    unsigned char csm_mask = CSM_BITS(keyon);
+    write_ym2151_wait(LOAD,  csm_mask | ov_mask | irq_mask | load_mask);
 }
 
 

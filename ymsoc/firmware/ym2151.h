@@ -62,10 +62,7 @@ void load_ch_params(ym2151_rt * rt, unsigned char chan); // Do not use for updat
 
 // Timer helpers
 void load_timerab(unsigned int pda, unsigned char pdb, int flag);
-void start_timerab(int flag);
-void clearov_timerab(int flag);
-void irqen_timerab(int flag);
-void csm_timera(unsigned char keyon);
+void ctl_timerab(unsigned char clear_ov, unsigned char irq_en, unsigned char load, unsigned char keyon, int flag);
 inline unsigned char readirq_timerab(void);
 
 

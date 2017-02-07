@@ -19,6 +19,8 @@ void isr(void)
 
 	if(irqs & (1 << YM2151_INTERRUPT))
 	{
+		// Fun: Set timer A to 0x3FF and uncomment the below line.
+		//write_ym2151_wait(CT, CT_BITS(0x03));
 		unsigned int reason = ym2151_ev_pending_read();
 		if(reason & 0x01)
 		{
@@ -33,7 +35,7 @@ void isr(void)
 				timerb_ov = 1;
 			}
 
-			clearov_timerab(timer_flags);
+			ctl_timerab(1, 1, 0, 0, timer_flags);
 			ym2151_ev_pending_write(0x01);
 		}
 

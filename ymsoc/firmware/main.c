@@ -6,6 +6,7 @@
 
 
 extern volatile unsigned int num_samples;
+extern volatile int timera_ov;
 extern volatile int timerb_ov;
 
 
@@ -35,16 +36,16 @@ int main(int argc, char * argv[])
             },
             {
                 .dt1 = 0, .mul = 0, .tl = 0, .ks = 0,
+                .ar = 15, .ams_en = 0, .d1r = 0, .dt2 = 0,
+                .d2r = 0, .d1l = 0, .rr = 0
+            },
+            {
+                .dt1 = 0, .mul = 0, .tl = 127, .ks = 0,
                 .ar = 0, .ams_en = 0, .d1r = 0, .dt2 = 0,
                 .d2r = 0, .d1l = 0, .rr = 0
             },
             {
-                .dt1 = 0, .mul = 0, .tl = 0, .ks = 0,
-                .ar = 0, .ams_en = 0, .d1r = 0, .dt2 = 0,
-                .d2r = 0, .d1l = 0, .rr = 0
-            },
-            {
-                .dt1 = 0, .mul = 0, .tl = 0, .ks = 0,
+                .dt1 = 0, .mul = 0, .tl = 127, .ks = 0,
                 .ar = 0, .ams_en = 0, .d1r = 0, .dt2 = 0,
                 .d2r = 0, .d1l = 0, .rr = 0
             }
@@ -67,32 +68,18 @@ int main(int argc, char * argv[])
     load_ym2151_inst(&sine, 0);
     load_ch_params(&sine_rt, 0);
 
-    load_timerab(0, 16, TIMER_B);
-    irqen_timerab(TIMER_B);
-    start_timerab(TIMER_B);
+    load_timerab(0x3FE, 0, TIMER_A);
+    ctl_timerab(1, 1, 1, 0, TIMER_A);
 
-    while(YM_CHECK_BUSY);
-    write_ym2151_wait(CT, CT_BITS(0x01));
-
-    while(!timerb_ov)
+    while(!timera_ov)
     {
 
     }
 
-    start_timerab(0);
-    irqen_timerab(0);
-
-    while(YM_CHECK_BUSY);
-    write_ym2151_wait(CT, CT_BITS(0x03));
-
-    while(1)
-    {
-
-    }
-
+    ctl_timerab(0, 0, 0, 0, TIMER_A);
 
     /* Go! */
-    write_ym2151_wait(KON_CH, KON_CH_BITS(0) | KON_SN_BITS(0x1));
+    write_ym2151_wait(KON_CH, KON_CH_BITS(0) | KON_SN_BITS(0x5));
 
     unsigned char i = 0;
     while(1)
