@@ -41,7 +41,7 @@ void panic_ym2151(void)
             unsigned char op_offs = chan + op*8;
             write_ym2151_wait(MUL_CH1_M1 + op_offs, DT1_BITS(0) | MUL_BITS(0));
             write_ym2151_wait(TL_CH1_M1 + op_offs, TL_BITS(127));
-            write_ym2151_wait(AR_CH1_M1 + op_offs, KS_BITS(0) | AR_BITS(31));
+            write_ym2151_wait(AR_CH1_M1 + op_offs, KS_BITS(0) | AR_BITS(0));
             write_ym2151_wait(D1R_CH1_M1 + op_offs, AMS_EN_BITS(0) | D1R_BITS(0));
             write_ym2151_wait(D2R_CH1_M1 + op_offs, DT2_BITS(0) | D2R_BITS(0));
             write_ym2151_wait(RR_CH1_M1 + op_offs, D1L_BITS(0) | RR_BITS(15));
