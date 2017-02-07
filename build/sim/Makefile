@@ -4,6 +4,8 @@ include paths.mak
 # JT51- Source dir of JT51
 # YMSOC- Root of YMSoC
 
+OUTDIR = $(YMSOC)/build/sim/out
+
 SOURCES = lm32_config.v
 SOURCES += $(RTL)/lm32_adder.v $(RTL)/lm32_addsub.v $(RTL)/lm32_cpu.v
 SOURCES += $(RTL)/lm32_dcache.v $(RTL)/lm32_debug.v $(RTL)/lm32_decoder.v
@@ -23,18 +25,18 @@ SOURCES += $(JT51)/jt51_exp2lin.v $(JT51)/jt51_lfo.v $(JT51)/jt51_lin2exp.v
 SOURCES += $(JT51)/jt51_noise.v $(JT51)/jt51_op.v $(JT51)/jt51_phinc_rom.v
 SOURCES += $(JT51)/jt51_reg.v $(JT51)/jt51_sh2.v $(JT51)/jt51_sum_op.v
 
-SOURCES += $(YMSOC)/build/gateware/top.v $(YMSOC)/ymsoc/extern/wb_async_reg.v
+SOURCES += $(OUTDIR)/gateware/top.v $(YMSOC)/ymsoc/extern/wb_async_reg.v
 
 all: sim
 
-$(YMSOC)/build/gateware/top.v: $(YMSOC)/ymsoc/*.py $(YMSOC)/ymsoc/platforms/sim.py $(YMSOC)/ymsoc/firmware/*.c
+$(OUTDIR)/gateware/top.v: $(YMSOC)/ymsoc/*.py $(YMSOC)/ymsoc/platforms/sim.py $(YMSOC)/ymsoc/firmware/*.c
 	cd $(YMSOC)
-	PYTHONPATH=$(YMSOC) python3 -m ymsoc --device xc6slx25 build --jt51-dir $(JT51) --output-dir $(YMSOC)/build --no-compile-gateware ymsoc.platforms.sim
+	PYTHONPATH=$(YMSOC) python3 -m ymsoc --device xc6slx25 build --jt51-dir $(JT51) --output-dir $(YMSOC)/build/sim/out --no-compile-gateware ymsoc.platforms.sim
 
-ymsoc_tb.vvp: ymsoc_tb.v $(YMSOC)/build/gateware/top.v $(YMSOC)/build/gateware/mem.init $(YMSOC)/build/software/fm-driver/fm-driver.bin
+ymsoc_tb.vvp: ymsoc_tb.v $(OUTDIR)/gateware/top.v $(OUTDIR)/gateware/mem.init $(OUTDIR)/software/fm-driver/fm-driver.bin
 	iverilog -o ymsoc_tb.vvp -I. -I$(RTL) -I$(JT51) ymsoc_tb.v $(SOURCES)
-	cp $(YMSOC)/build/gateware/mem.init .
-	lm32-elf-objdump -d $(YMSOC)/build/software/fm-driver/fm-driver.elf > fm-driver.asm
+	cp $(OUTDIR)/gateware/mem.init .
+	lm32-elf-objdump -d $(OUTDIR)/software/fm-driver/fm-driver.elf > fm-driver.asm
 
 sim: ymsoc_tb.vvp
 	vvp ymsoc_tb.vvp

@@ -15,6 +15,8 @@ class _CRG(Module):
         self.clock_domains.cd_ym2151 = ClockDomain()
         self.clock_domains.cd_sys = ClockDomain()
         self.clock_domains.cd_por = ClockDomain(reset_less=True)
+        self.clock_domains.cd_arb = ClockDomain()
+        self.manual_reset = Signal()
 
         clk = platform.request("clk32")
 
@@ -23,8 +25,10 @@ class _CRG(Module):
         self.sync.por += int_rst.eq(0)
         self.comb += [
             self.cd_sys.clk.eq(clk),
+            self.cd_arb.clk.eq(clk),
             self.cd_por.clk.eq(clk),
-            self.cd_sys.rst.eq(int_rst)
+            self.cd_arb.rst.eq(int_rst),
+            self.cd_sys.rst.eq(int_rst | self.manual_reset)
         ]
 
         ym_clk = Signal(1)
@@ -43,9 +47,6 @@ class _CRG(Module):
         self.sync += [
             If(reset_cnt != 0,
                 reset_cnt.eq(reset_cnt - 1))]
-
-        # self.comb += [self.cd_ym2151.clk.eq(clk)]
-        # self.specials += AsyncResetSynchronizer(self.cd_ym2151, ResetSignal("sys"))
 
 
 # Passing platform as an input argument is technically redundant since each
