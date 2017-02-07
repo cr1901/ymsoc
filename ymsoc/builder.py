@@ -15,11 +15,16 @@ class YMSoCBuilder(Builder):
 
         self.software_packages = []
         self.add_software_package("libbase")
-        self.add_software_package("fm-driver", os.path.abspath(os.path.join(os.path.dirname(__file__), "firmware")))
+        self.add_software_package("libym2151",
+            os.path.abspath(os.path.join(os.path.dirname(__file__), "firmware",
+            "libym2151")))
+        self.add_software_package("ymselftest",
+            os.path.abspath(os.path.join(os.path.dirname(__file__),
+            "firmware", "ymselftest")))
 
     def _initialize_rom(self):
-        bios_file = os.path.join(self.output_dir, "software", "fm-driver",
-                                 "fm-driver.bin")
+        bios_file = os.path.join(self.output_dir, "software", "ymselftest",
+                                 "ymselftest.bin")
         if self.soc.integrated_rom_size:
             with open(bios_file, "rb") as boot_file:
                 boot_data = []

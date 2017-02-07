@@ -1,7 +1,7 @@
 #include <generated/csr.h>
 #include <irq.h>
 
-#include "ym2151.h"
+#include <ym2151.h>
 
 volatile unsigned int num_samples = 0;
 volatile int timera_ov = 0;

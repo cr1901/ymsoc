@@ -2,7 +2,7 @@
 #include <generated/mem.h>
 #include <irq.h>
 
-#include "ym2151.h"
+#include <ym2151.h>
 
 
 extern volatile unsigned int num_samples;
