@@ -23,24 +23,6 @@ mem_port = [
 ]
 
 
-"""class ArbDecode(Module):
-    def __init__(self):
-        self.in_addr = Signal(18)
-        self.out_addr = Signal(4)
-
-        self.ym_rom = Signal(1)
-        self.ym_ram = Signal(1)
-        self.host_buffer = Signal(1)
-        self.arb_ctl = Signal(1)
-
-        self.comb += [self.ym_rom.eq(in_addr[17:19] == 0x00),
-            self.ym_ram.eq(in_addr[17:19] == 0x01),
-            self.host_buffer.eq(in_addr[17:19] == 0x10),
-            self.arb_ctl.eq(in_addr[17:19] == 0x11),
-        ]"""
-
-
-
 class ArbReg(Module):
     def __init__(self):
         self.reg_bus = Record(mem_port)
@@ -72,45 +54,6 @@ class ArbReg(Module):
                 )
             )
         ]
-
-
-# Originally I intended to put the device on the wishbone bus, but decided
-# not to.
-"""class ArbSend(Module):
-    def __init__(self):
-        self.cpu_bus = wishbone.Interface()
-        self.addr = Signal(16)
-        self.count = Signal(16)
-        self.start = Signal(1)
-        self.next_req = Signal(1)
-        self.
-        self.done = Signal(1)
-
-        self.submodules.fsm = fsm = FSM(reset_state="IDLE")
-
-        fsm.act("IDLE",
-            If(self.start,
-                NextValue(count)
-                NextState("SEND")
-            )
-        )
-
-        fsm.act("SEND",
-            self.cpu_bus
-            self.cpu_bus.stb.eq(1),
-            self.cpu_bus.cyc.eq(1),
-
-            If(self.cpu_bus.ack == 1,
-                If(self.count == 0,
-                    NextState("IDLE"),
-                    NextValue(self.done, 1)
-                ).
-                Else(
-                    NextValue(self.count, self.count - 1),
-                    NextState("WAIT")
-                )
-            )
-        )"""
 
 
 # Arbiter serves two roles:
@@ -156,16 +99,6 @@ def read_port(bus, adr):
 if __name__ == "__main__":
     m = Arbiter()
     ios = [io[0] for io in m.host_bus.iter_flat()]
-    # ios.extend([io[0] for io in m.rom_port.iter_flat()])
+    ios.extend([io[0] for io in m.rom_port.iter_flat()])
     ios.extend([m.cpu_reset])
-
-    mem = Memory(32, 64)
-    port = mem.get_port(write_capable=True, clock_domain="arb")
-    m.specials += mem, port
-
-    m.comb += [m.rom_port.dat_r.eq(port.dat_r),
-        port.dat_w.eq(m.rom_port.dat_w),
-        port.we.eq(m.rom_port.wr),
-        port.adr.eq(m.rom_port.adr)]
-
-    # convert(m, ios=set(ios)).write("arbiter.v")
+    convert(m, ios=set(ios)).write("arbiter.v")

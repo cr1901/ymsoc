@@ -112,22 +112,3 @@ class UARTBridge(Module):
                 )
             )
         )
-
-
-if __name__ == "__main__":
-    m = UARTBridge()
-    a = Arbiter()
-
-    m.comb += [m.bus.connect(a.host_bus)]
-    # ios = [io[0] for io in m.host_bus.iter_flat()]
-    # ios.extend([io[0] for io in m.rom_port.iter_flat()])
-    # ios.extend([m.cpu_reset])
-
-    mem = Memory(32, 64)
-    port = mem.get_port(write_capable=True, clock_domain="arb")
-    a.specials += mem, port
-
-    a.comb += [m.rom_port.dat_r.eq(port.dat_r),
-        port.dat_w.eq(m.rom_port.dat_w),
-        port.we.eq(m.rom_port.wr),
-        port.adr.eq(m.rom_port.adr)]
