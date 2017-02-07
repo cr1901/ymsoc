@@ -14,7 +14,6 @@ class YMSoCBuilder(Builder):
             compile_gateware, gateware_toolchain_path, csr_csv)
 
         self.software_packages = []
-        self.add_software_package("libcompiler-rt")
         self.add_software_package("libbase")
         self.add_software_package("fm-driver", os.path.abspath(os.path.join(os.path.dirname(__file__), "firmware")))
 
