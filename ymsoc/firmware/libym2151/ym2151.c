@@ -35,7 +35,10 @@ void panic_ym2151(void)
 {
     for(int chan=0; chan < 8; chan++)
     {
-        write_ym2151_wait(FB_CH1 + chan, FB_BITS(0) | CONECT_BITS(0));
+        write_ym2151_wait(FB_CH1 + chan, RL_BITS(0) | FB_BITS(0) | CONECT_BITS(0));
+        write_ym2151_wait(KC_CH1 + chan, KC_BITS(0));
+        write_ym2151_wait(KF_CH1 + chan, KF_BITS(0));
+        write_ym2151_wait(PMS_CH1 + chan, PMS_BITS(0) | AMS_BITS(0));
         for(int op = 0; op < 4; op++)
         {
             unsigned char op_offs = chan + op*8;

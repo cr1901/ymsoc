@@ -39,12 +39,15 @@ top dut(
 initial begin
     $dumpfile("ymsoc.vcd");
     $dumpvars(0, dut);
+	$dumpoff;
+	#6000000;
+	$dumpon;
 end
 
 
 always @ (posedge sys_clk)
 begin
-    if($time > 500000) begin
+    if($time > 12000000) begin
         $finish;
     end
 end
