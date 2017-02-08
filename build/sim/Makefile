@@ -29,14 +29,14 @@ SOURCES += $(OUTDIR)/gateware/top.v $(YMSOC)/ymsoc/extern/wb_async_reg.v
 
 all: sim
 
-$(OUTDIR)/gateware/top.v: $(YMSOC)/ymsoc/*.py $(YMSOC)/ymsoc/platforms/sim.py $(YMSOC)/ymsoc/firmware/*.c
+$(OUTDIR)/gateware/top.v: $(YMSOC)/ymsoc/*.py $(YMSOC)/ymsoc/platforms/sim.py $(YMSOC)/ymsoc/firmware/libym2151/*.c $(YMSOC)/ymsoc/firmware/ymselftest/*.c
 	cd $(YMSOC)
 	PYTHONPATH=$(YMSOC) python3 -m ymsoc --device xc6slx25 build --jt51-dir $(JT51) --output-dir $(YMSOC)/build/sim/out --no-compile-gateware ymsoc.platforms.sim
 
-ymsoc_tb.vvp: ymsoc_tb.v $(OUTDIR)/gateware/top.v $(OUTDIR)/gateware/mem.init $(OUTDIR)/software/fm-driver/fm-driver.bin
+ymsoc_tb.vvp: ymsoc_tb.v $(OUTDIR)/gateware/top.v $(OUTDIR)/gateware/mem.init $(OUTDIR)/software/ymselftest/ymselftest.bin
 	iverilog -o ymsoc_tb.vvp -I. -I$(RTL) -I$(JT51) ymsoc_tb.v $(SOURCES)
 	cp $(OUTDIR)/gateware/mem.init .
-	lm32-elf-objdump -d $(OUTDIR)/software/fm-driver/fm-driver.elf > fm-driver.asm
+	lm32-elf-objdump -d $(OUTDIR)/software/ymselftest/ymselftest.elf > ymselftest.asm
 
 sim: ymsoc_tb.vvp
 	vvp ymsoc_tb.vvp
