@@ -63,14 +63,33 @@ class Arbiter(Module, AutoCSR):
     def __init__(self):
         self.host_bus = Record(arb_bus)
         self.rom_port = Record(mem_port)
+        self.xfer_port = Record(mem_port)
         # CSR bus will be provided automatically.
 
         self.submodules.regs = ArbReg()
+
+        self.host_ctl = CSRStatus(32)
+        self.host_size = CSRStatus(16)
+        # Send data back to host. Perhaps attach directly to avail
+        # signal and have arbiter bridges block until toggle?
+        # self.snd_ctl = CSRStorage(32)
+        # self.snd_len = CSRStorage(16)
+
+        self.submodules.ev = EventManager()
+        # EventSourcePulse should also probably work?
+        self.ev.data_avail = EventSourceProcess()
+        self.ev.finalize()
+
         self.cpu_reset = Signal()
 
+        # Reg file from host perspective
         cases = {
             0x00: [
                 self.host_bus.connect(self.rom_port, leave_out={"ack", "avail"})
+            ],
+
+            0x02: [
+                self.host_bus.connect(self.xfer_port, leave_out={"ack", "avail"})
             ],
 
             0x03 : [
@@ -79,7 +98,12 @@ class Arbiter(Module, AutoCSR):
         }
 
         self.comb += [Case(self.host_bus.adr[16:], cases)]
-        self.comb += [self.cpu_reset.eq(self.regs.reg_ctl[0])]
+        self.comb += [self.cpu_reset.eq(self.regs.reg_ctl[0]),
+            self.ev.data_avail.trigger.eq(~self.regs.reg_ctl[1])]
+
+        # Reg file from sound CPU perspective.
+        self.comb += [self.host_ctl.status.eq(self.regs.reg_ctl),
+            self.host_size.status.eq(self.regs.reg_size)]
 
 
 def write_port(bus, adr, dat):
