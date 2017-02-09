@@ -1,11 +1,14 @@
+#include <generated/mem.h>
 #include <generated/csr.h>
 #include <irq.h>
+#include <string.h>
 
 #include <ym2151.h>
 
 volatile unsigned int num_samples = 0;
 volatile int timera_ov = 0;
 volatile int timerb_ov = 0;
+volatile int host_flag = 0;
 
 void isr(void);
 void handle_sample(void);
@@ -44,6 +47,20 @@ void isr(void)
 			handle_sample();
 			ym2151_ev_pending_write(0x02);
 		}
+	}
+
+	if(irqs & (1 << HOST_INTERRUPT))
+	{
+		unsigned int ctl = host_host_ctl_read();
+		if(ctl & 0x02) // Second bit: Data avail
+		{
+			unsigned short int size = host_host_size_read();
+			if(size == 4)
+			{
+				memcpy((unsigned char *) &host_flag, (unsigned char *) XFER_BASE + 256, 4);
+			}
+		}
+		host_ev_pending_write(0x01);
 	}
 }
 

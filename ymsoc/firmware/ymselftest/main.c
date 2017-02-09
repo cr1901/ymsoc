@@ -9,13 +9,14 @@
 extern volatile unsigned int num_samples;
 extern volatile int timera_ov;
 extern volatile int timerb_ov;
-
+extern volatile int host_flag;
 
 int main(int argc, char * argv[])
 {
     irq_setie(1);
     ym2151_ev_enable_write(0x03);
-    irq_setmask((1 << YM2151_INTERRUPT));
+    host_ev_enable_write(0x01);
+    irq_setmask((1 << YM2151_INTERRUPT) | (1 << HOST_INTERRUPT));
     panic_ym2151();
 
 #ifdef STOP_TEST
@@ -94,6 +95,13 @@ int main(int argc, char * argv[])
             while(YM_CHECK_BUSY);
             write_ym2151_data(CT_BITS(i));
             num_samples = 0;
+        }
+
+        if(host_flag == 0x5555AAAA)
+        {
+            host_flag = 0;
+            // Xfer something back as test.
+            break;
         }
     }
 #endif
