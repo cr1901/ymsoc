@@ -1,0 +1,86 @@
+Address Space
+=============
+
+CPU Memory Map
+--------------
+========== ============== ===========
+Address    Size (bytes)   Description
+========== ============== ===========
+0x00000000 16384          ROM
+0x10000000 4096           CPU RAM
+0xb0000000 8              YM2151/JT51
+0xd0000000 512            DTA
+0xe0000000 256MB (Sparse) CSR
+========== ============== ===========
+
+YM2151/JT51 Area
+^^^^^^^^^^^^^^^^
+
+Please consult the YM2151 User Manual for register descriptions. Accesses
+to these regions are byte-only, and only the least-significant 8-bits of
+the CPU data bus connect to this region.
+
+========== ============== ===========
+Address    Size (bytes)   Description
+========== ============== ===========
+0xb0000000 1              Address (W)/Status (R)
+0xb0000004 1              Data (W)/Status (R)
+========== ============== ===========
+
+Data Transfer Area (DTA)
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+The DTA is used for communication between host and sound CPU. The host
+can access the DTA through the Arbiter address space. The sound CPU
+can notify the host of data available using Host CSRs and the host can
+notify the sound CPU via Arbiter control memory region.
+
+The DTA is implemented using dual-port block RAM, and memory accesses
+should adhere to the following conventions to prevent undefined behavior:
+
+========== ============== ===========
+Address    Size (bytes)   Description
+========== ============== ===========
+0xd0000000 256            Reserved (CPU Write/Host Read)
+0xd0000100 256            CPU Read/Host Write
+========== ============== ===========
+
+Configuration and Status Registers (CSR)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+CSRs are register banks provided by MiSoC that are used for low-bandwidth
+configuration. For address decoding simplicity each byte in a CSR is
+accessed on a 32-bit boundary.
+
+========== ============== ===========
+Address    Size (bytes)   Description
+========== ============== ===========
+0xe0002000 1              TMPU Enable Null Address (Unused)
+0xe0002004 1              TMPU Enable Program Address (Unused)
+0xe0002008 4              TMPU Enable Program Write (Unused)
+0xe0002800 1              YM2151 Event Status
+0xe0002804 1              YM2151 Event Pending
+0xe0002808 1              YM2151 Event Enable
+0xe0003000 4              Host Control
+0xe0003010 2              Host (Incoming) Tranfer Size
+0xe0003018 1              Host Event Status
+0xe000301c 1              Host Event Pending
+0xe0003020 1              Host Event Enable
+========== ============== ===========
+
+
+Arbiter Memory Map
+------------------
+
+The Arbiter provides an address bus through which external peripherals
+can access YMSoC. *The arbiter only accepts 32-bit word transfers.* The
+sound CPU can access Arbiter control data through the host CSRs.
+
+========== ============== ===========
+Address    Size (words)   Description
+========== ============== ===========
+0x00000    65536          Control
+0x10000    65536          CPU ROM
+0x20000    65536          Reserved (CPU RAM)
+0x30000    65536          DTA
+========== ============== ===========
