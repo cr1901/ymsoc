@@ -8,7 +8,7 @@ all: libym2151.a
 libym2151.a: $(OBJECTS) $(LIBYM2151_DIRECTORY)/ym2151.h
 	$(AR) crs libym2151.a $(OBJECTS)
 
-%.o: $(LIBYM2151_DIRECTORY)/%.c
+%.o: $(LIBYM2151_DIRECTORY)/%.c $(LIBYM2151_DIRECTORY)/ym2151.h
 	$(compile)
 
 %.o: $(LIBYM2151_DIRECTORY)/%.S
