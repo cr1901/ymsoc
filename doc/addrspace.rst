@@ -7,7 +7,7 @@ CPU Memory Map
 Address    Size (bytes)   Description
 ========== ============== ===========
 0x00000000 16384          ROM
-0x10000000 4096           CPU RAM
+0x10000000 20480          CPU RAM
 0xb0000000 8              YM2151/JT51
 0xd0000000 512            DTA
 0xe0000000 256MB (Sparse) CSR

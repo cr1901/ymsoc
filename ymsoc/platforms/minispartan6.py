@@ -69,7 +69,7 @@ class YMSoC(YMSoCCore):
     def __init__(self, platform, **kwargs):
         clk_freq = 32*1000000
         YMSoCCore.__init__(self, platform, clk_freq, integrated_rom_size=0x4000,
-            integrated_sram_size=4096,
+            integrated_sram_size=0x5000,
             integrated_main_ram_size=0,
             **kwargs)
         # integrated_sram_size=0x4000, **kwargs)

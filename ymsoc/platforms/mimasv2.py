@@ -66,7 +66,7 @@ class YMSoC(YMSoCCore):
         clk_freq = 100*1000000
         YMSoCCore.__init__(self, platform, clk_freq,
             integrated_rom_size=0x4000,
-            integrated_sram_size=4096,
+            integrated_sram_size=0x5000,
             integrated_main_ram_size=0, **kwargs)
         self.submodules.crg = _CRG(platform, clk_freq)
         self.submodules.bridge = UARTBridge(32000000, 19200)
