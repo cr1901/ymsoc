@@ -81,8 +81,8 @@ sound CPU can access Arbiter control data through the host CSRs.
 ========== ============== ===========
 Address    Size (words)   Description
 ========== ============== ===========
-0x00000    65536          Control
-0x10000    65536          CPU ROM
-0x20000    65536          Reserved (CPU RAM)
-0x30000    65536          DTA
+0x00000    16384          Control
+0x10000    16384          CPU ROM
+0x20000    16384          Reserved (CPU RAM)
+0x30000    16384          DTA
 ========== ============== ===========

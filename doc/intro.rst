@@ -27,7 +27,7 @@ support for a new board in Migen/YMSoC is easy, and I can be persuaded to do it 
 you if interested.
 
 Block Diagram
-=============
+-------------
 .. figure:: blockdiag.png
 
    Block diagram of a generic YMSoC design.

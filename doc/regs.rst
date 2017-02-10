@@ -166,7 +166,7 @@ CPU_RST (R/W)
 
 
 Size
-^^^^^^^
+^^^^
 
 Offset 0x0001 in bank 0x00
 
