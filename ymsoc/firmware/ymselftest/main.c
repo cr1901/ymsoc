@@ -99,6 +99,7 @@ int main(int argc, char * argv[])
 
         if(host_flag == 0x5555AAAA)
         {
+            memcpy((unsigned char *) XFER_BASE, (unsigned char *) &host_flag, 4);
             host_flag = 0;
             // Xfer something back as test.
             break;

@@ -28,7 +28,14 @@ class ArbReg(Module):
         self.reg_bus = Record(mem_port)
         self.reg_ctl = Signal(32, reset=1) # Reset CPU (bit 0), notify data avail (bit 1).
         self.reg_size = Signal(16) # Payload size from host to sound CPU
-        # data area.
+        self.reg_snd_ctl = Signal(8)
+        self.reg_snd_size = Signal(16)
+
+        self.host_ack = Signal(1) # Write to this reg to ack data-avail
+        # from sound CPU data area. Clears DAT_AVAIL of snd_ctl.
+        self.snd_ack = Signal(1) # Signal that tells reg file to clear
+        # DAT_AVAIL of host. If there's a tie (i.e. sound CPU and host are
+        # both writing at the same time), host wins.
 
         cases = {
             0x00 : [
@@ -37,7 +44,15 @@ class ArbReg(Module):
 
             0x01 : [
                 self.reg_bus.dat_r.eq(self.reg_size)
-            ]
+            ],
+
+            0x02 : [
+                self.reg_bus.dat_r.eq(self.reg_snd_ctl)
+            ],
+
+            0x03 : [
+                self.reg_bus.dat_r.eq(self.reg_snd_size)
+            ],
         }
 
         self.comb += [
@@ -72,8 +87,9 @@ class Arbiter(Module, AutoCSR):
         self.host_size = CSRStatus(16)
         # Send data back to host. Perhaps attach directly to avail
         # signal and have arbiter bridges block until toggle?
-        # self.snd_ctl = CSRStorage(32)
-        # self.snd_len = CSRStorage(16)
+        self.snd_ctl = CSRStorage(8)
+        self.snd_size = CSRStorage(16)
+        # self.snd_ack = CSR(1) # Write-through
 
         self.submodules.ev = EventManager()
         # EventSourcePulse should also probably work?
@@ -97,13 +113,21 @@ class Arbiter(Module, AutoCSR):
             ],
         }
 
+        # Bank buses
         self.comb += [Case(self.host_bus.adr[16:], cases)]
+
+        # Control connections to/from arbiter.
         self.comb += [self.cpu_reset.eq(self.regs.reg_ctl[0]),
-            self.ev.data_avail.trigger.eq(~self.regs.reg_ctl[1])]
+            self.ev.data_avail.trigger.eq(~self.regs.reg_ctl[1]),
+            self.host_bus.avail.eq(self.snd_ctl.storage[1])]
 
         # Reg file from sound CPU perspective.
         self.comb += [self.host_ctl.status.eq(self.regs.reg_ctl),
             self.host_size.status.eq(self.regs.reg_size)]
+
+        # Sound CPU reg file from host perspective.
+        self.comb += [self.regs.reg_snd_ctl.eq(self.snd_ctl.storage),
+            self.regs.reg_snd_size.eq(self.snd_size.storage)]
 
 
 def write_port(bus, adr, dat):
