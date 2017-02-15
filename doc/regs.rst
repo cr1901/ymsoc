@@ -81,8 +81,45 @@ this information to control flow purposes.
 Host Incoming Transfer Size
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-This is a read-only mirror of the Arbiter Size register. The CPU uses this to
-coordinate data transfers from the host.
+This is a read-only mirror of the Arbiter Incoming Transfer Size register.
+The CPU uses this to coordinate data transfers from the host.
+
+
+Sound Control
+^^^^^^^^^^^^^
+
++---+---+---+---+---+---+-------+---+
+|D07|D06|D05|D04|D03|D02|D01    |D00|
++---+---+---+---+---+---+-------+---+
+|X  |X  |X  |X  |X  |X  |SAVAIL |X  |
++---+---+---+---+---+---+-------+---+
+
+SAVAIL
+    0- Sound CPU has not written to DTA.
+
+    1- Sound CPU has written data to DTA, avail line has toggled 0 => 1.
+
+    When SAVAIL is 1, host should treat arbiter's ``avail`` line as an
+    edge-triggered interrupt notifying that data from the sound CPU is
+    available. As of this writing, SAVAIL connects directly to ``avail``.
+    *The arbiter avail signal uses leading-edge (0=1) polarity.*
+
+
+Sound Outgoing Transfer Size
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
++---+---+---+---+---+---+---+---+
+|D15|D14|D13|D12|D11|D10|D09|D08|
++---+---+---+---+---+---+---+---+
+|S15|S14|S13|S12|S11|S10|S09|S08|
++---+---+---+---+---+---+---+---+
+|D07|D06|D05|D04|D03|D02|D01|D00|
++---+---+---+---+---+---+---+---+
+|S07|S06|S05|S04|S03|S02|S01|S00|
++---+---+---+---+---+---+---+---+
+
+S0-15
+    Size of the transferred data by the sound CPU. For use by host.
 
 
 Host Event Status
@@ -95,7 +132,9 @@ Host Event Status
 +---+---+---+---+---+---+---+--------+
 
 HTOGGLE
-    Inverse of DAT_AVAIL bit in Arbiter Control.
+    Inverse of DAT_AVAIL bit in Arbiter Control. HTOGGLE is the value of the
+    actual interrupt line used for ``HOST_INTERRUPT``. Thus ``HOST_INTERRUPT``
+    is falling-edge triggered.
 
 
 Host Event Pending
@@ -131,10 +170,10 @@ HEN
 Arbiter
 -------
 
-Control
-^^^^^^^
+Arbiter Control
+^^^^^^^^^^^^^^^
 
-Offset 0x0000 in bank 0x00.
+Offset 0x0000 in bank 0x03.
 
 +---+---+---+---+---+---+----------+--------+
 |D31|D30|D29|D28|D27|D26|D25       |D24     |
@@ -165,10 +204,10 @@ CPU_RST (R/W)
     1- Sound CPU is held in reset.
 
 
-Size
-^^^^
+Arbiter Incoming Transfer Size
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Offset 0x0001 in bank 0x00
+Offset 0x0001 in bank 0x03
 
 +---+---+---+---+---+---+---+---+
 |D31|D30|D29|D28|D27|D26|D25|D24|
@@ -190,3 +229,24 @@ Offset 0x0001 in bank 0x00
 
 S0-15
     Size of the transferred data. For use by sound CPU.
+
+
+Arbiter Sound Control
+^^^^^^^^^^^^^^^^^^^^^
+
+Offset 0x0002 in bank 0x03.
+
+This is a read-only mirror of the Sound Control register. Only the least
+significant byte is valid. The host can use this information for control
+flow purposes, although it is likely that the ``host_bus`` ``avail`` control
+signal will be used instead.
+
+
+Arbiter Outgoing Transfer Size
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Offset 0x0003 in bank 0x03.
+
+This is a read-only mirror of the Sound Outgoing Transfer Size register.
+Only the least significant word is valid. The host uses this to coordinate
+data transfers from the sound CPU.

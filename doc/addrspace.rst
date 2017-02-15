@@ -65,9 +65,11 @@ Address    Size (bytes)   Description
 0xe0002808 1              YM2151 Event Enable
 0xe0003000 4              Host Control
 0xe0003010 2              Host (Incoming) Tranfer Size
-0xe0003018 1              Host Event Status
-0xe000301c 1              Host Event Pending
-0xe0003020 1              Host Event Enable
+0xe0003018 1              Sound Control
+0xe000301c 2              Sound (Outgoing) Transfer Size
+0xe0003024 1              Host Event Status
+0xe0003028 1              Host Event Pending
+0xe000302c 1              Host Event Enable
 ========== ============== ===========
 
 
@@ -81,8 +83,8 @@ sound CPU can access Arbiter control data through the host CSRs.
 ========== ============== ===========
 Address    Size (words)   Description
 ========== ============== ===========
-0x00000    16384          Control
-0x10000    16384          CPU ROM
-0x20000    16384          Reserved (CPU RAM)
-0x30000    16384          DTA
+0x00000    16384          CPU ROM
+0x10000    16384          Reserved (CPU RAM)
+0x20000    16384          DTA
+0x30000    16384          Control
 ========== ============== ===========
