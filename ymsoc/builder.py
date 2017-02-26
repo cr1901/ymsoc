@@ -15,6 +15,7 @@ class YMSoCBuilder(Builder):
 
         self.software_packages = []
         self.add_software_package("libbase")
+        self.add_software_package("libcompiler-rt")
         self.add_software_package("libym2151",
             os.path.abspath(os.path.join(os.path.dirname(__file__), "firmware",
             "libym2151")))
