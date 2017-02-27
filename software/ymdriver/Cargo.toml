@@ -1,8 +1,8 @@
 [package]
-name = "ymselftest"
+name = "ymdriver"
 version = "0.1.0"
 authors = ["William D. Jones <thor0505@comcast.net>"]
 
 [dependencies]
 serial = "0.3"
-ymdriver = { path = "../ymdriver" }
+byteorder = "1.0.0"
