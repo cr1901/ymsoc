@@ -99,7 +99,10 @@ impl Write for SerialHandle  {
             {
                 let dat = &mut ser_string[3 .. 7];
                 dat.copy_from_slice(w);
+                dat.reverse(); // Little endian through serial, but big-endian otherwise.
             }
+
+            println!("{:?}", ser_string);
 
             let mut port = self.port.lock().unwrap();
             port.write(&ser_string);
@@ -123,8 +126,12 @@ impl Seek for SerialHandle {
     fn seek(&mut self, pos: SeekFrom) -> io::Result<u64> {
         match pos {
             SeekFrom::Start(x) => {
-                self.ptr = x as u16;
-                Ok(x as u64)
+                if x % 4 == 0 {
+                    self.ptr = (x / 4) as u16;
+                    Ok(x as u64)
+                } else {
+                    Err(Error::new(ErrorKind::InvalidInput, "Seek position must be multiple of 4!"))
+                }
             },
             _ => Err(Error::new(ErrorKind::InvalidInput, "Only SeekFrom::Start supported!"))
         }
