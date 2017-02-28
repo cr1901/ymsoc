@@ -102,8 +102,6 @@ impl Write for SerialHandle  {
                 dat.reverse(); // Little endian through serial, but big-endian otherwise.
             }
 
-            println!("{:?}", ser_string);
-
             let mut port = self.port.lock().unwrap();
             port.write(&ser_string);
             self.ptr += 1;

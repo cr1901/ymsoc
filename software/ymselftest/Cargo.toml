@@ -5,4 +5,5 @@ authors = ["William D. Jones <thor0505@comcast.net>"]
 
 [dependencies]
 serial = "0.3"
+argparse = "*"
 ymdriver = { path = "../ymdriver" }
