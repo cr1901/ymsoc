@@ -1,5 +1,5 @@
 [package]
-name = "ymselftest"
+name = "ymload"
 version = "0.1.0"
 authors = ["William D. Jones <thor0505@comcast.net>"]
 
